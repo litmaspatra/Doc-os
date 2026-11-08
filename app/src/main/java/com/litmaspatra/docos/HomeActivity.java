@@ -22,16 +22,35 @@ import android.widget.TextView;
 import com.litmaspatra.docos.ui.Ui;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeActivity extends Activity {
     private static final int REQ_OPEN = 1;
-    private List<Recents.Item> items;
+    private List<Recents.Item> items = new ArrayList<>();
     private BaseAdapter adapter;
     private TextView empty;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
+        try { build(); } catch (Throwable t) { showFatal(t); }
+    }
+
+    private void showFatal(Throwable t) {
+        StringWriter sw = new StringWriter();
+        t.printStackTrace(new PrintWriter(sw));
+        TextView tv = new TextView(this);
+        tv.setText("Doc-os could not start.\n\n" + sw);
+        tv.setTextIsSelectable(true);
+        tv.setPadding(40, 60, 40, 40);
+        android.widget.ScrollView sv = new android.widget.ScrollView(this);
+        sv.addView(tv);
+        setContentView(sv);
+    }
+
+    private void build() {
         getWindow().setStatusBarColor(Ui.BAR);
         getWindow().setNavigationBarColor(Ui.BG);
 
@@ -124,7 +143,32 @@ public class HomeActivity extends Activity {
         } }).start();
     }
 
-    @Override protected void onResume() { super.onResume(); reload(); }
+    @Override protected void onResume() {
+        super.onResume();
+        try { reload(); } catch (Throwable ignored) { }
+        showLastCrash();
+    }
+
+    /** If the app crashed last time, show the report so it can be copied and sent. */
+    private void showLastCrash() {
+        final String report = CrashLog.take(this);
+        if (report == null || isFinishing()) return;
+        TextView tv = new TextView(this);
+        tv.setText(report);
+        tv.setTextSize(11);
+        tv.setTextIsSelectable(true);
+        tv.setPadding(Ui.dp(this, 16), Ui.dp(this, 8), Ui.dp(this, 16), 0);
+        android.widget.ScrollView sv = new android.widget.ScrollView(this);
+        sv.addView(tv);
+        new AlertDialog.Builder(this).setTitle("Doc-os closed unexpectedly last time").setView(sv)
+                .setPositiveButton("Copy report", new DialogInterface.OnClickListener() {
+                    @Override public void onClick(DialogInterface d, int w) {
+                        android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        if (cm != null) cm.setPrimaryClip(android.content.ClipData.newPlainText("Doc-os crash report", report));
+                        android.widget.Toast.makeText(HomeActivity.this, "Copied", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }).setNegativeButton("Close", null).show();
+    }
 
     private void reload() {
         items = Recents.load(this);

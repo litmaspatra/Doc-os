@@ -94,6 +94,7 @@ public class ViewerActivity extends Activity implements DocView.Host {
         uri = in.getData();
         if (uri == null && in.getParcelableExtra(Intent.EXTRA_STREAM) instanceof Uri) uri = (Uri) in.getParcelableExtra(Intent.EXTRA_STREAM);
         if (uri == null) { fail("No file to open"); return; }
+        try { getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION); } catch (Exception ignored) { }
         name = displayName(uri);
         type = Ui.typeOf(name, getContentResolver().getType(uri));
         titleTv.setText(name);

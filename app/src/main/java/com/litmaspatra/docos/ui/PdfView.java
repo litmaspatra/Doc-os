@@ -293,7 +293,9 @@ public final class PdfView extends View {
                             int bh = Math.max(1, Math.round(w * (float) pg.getHeight() / pg.getWidth()));
                             b = Bitmap.createBitmap(w, bh, Bitmap.Config.ARGB_8888);
                             b.eraseColor(Color.WHITE);
-                            pg.render(b, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                            Matrix m = new Matrix();
+                            m.setScale(w / (float) pg.getWidth(), bh / (float) pg.getHeight());
+                            pg.render(b, null, m, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
                         } finally { pg.close(); }
                     } catch (Throwable t) { b = null; }
                 }

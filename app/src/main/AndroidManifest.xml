@@ -4,6 +4,7 @@
     <!-- No permissions at all: files are opened through the system file picker. -->
 
     <application
+        android:name=".App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="Doc-os"
