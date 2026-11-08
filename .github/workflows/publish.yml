@@ -21,5 +21,16 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: |
           echo "97e62717c53853c952588dc84f03c4c9b60212d94adf389037656bc526a81098  release/docos.apk" | sha256sum -c -
-          gh release upload "$TAG" release/docos.apk --clobber
-          gh release edit "$TAG" --draft=false --latest
+          cat > notes.md <<'NOTES'
+          Doc-os 1.0.0: lightweight PDF / DOCX / XLSX / PPTX reader and editor for Android 6+.
+
+          - PDF annotation (pen, highlighter, text, eraser), saved into the PDF
+          - Edit Word, Excel and PowerPoint files
+          - No permissions, no internet
+
+          APK SHA-256: `97e62717c53853c952588dc84f03c4c9b60212d94adf389037656bc526a81098`
+          Signing certificate SHA-256: `C3:EF:50:0C:D0:70:5D:1D:BA:09:00:C2:EB:5B:58:D2:D6:A7:1D:FA:63:D2:44:2C:E2:BF:76:38:6D:CB:17:13`
+
+          If Play Protect shows an "unknown app" prompt: More details, then Install anyway.
+          NOTES
+          gh release create "$TAG" release/docos.apk --title "Doc-os $TAG" --notes-file notes.md --latest
