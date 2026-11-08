@@ -1,6 +1,6 @@
 # Doc-os
 
-A very small (~250 KB) document reader and editor for **Android 6.0+**. Opens PDF, Word (.docx),
+A very small (~100 KB) document reader and editor for **Android 6.0+**. Opens PDF, Word (.docx),
 Excel (.xlsx) and PowerPoint (.pptx) files, lets you **annotate PDFs** and **edit** the Office files.
 No ads, no account, **no internet permission, no permissions at all**.
 
@@ -49,6 +49,14 @@ apksigner sign --ks my.jks --out docos.apk aligned.apk
 ```
 
 Never commit a keystore (`.gitignore` excludes `*.jks`).
+
+### Verify a release
+
+Official releases are signed with this certificate (`apksigner verify --print-certs docos.apk`):
+
+```
+C3:EF:50:0C:D0:70:5D:1D:BA:09:00:C2:EB:5B:58:D2:D6:A7:1D:FA:63:D2:44:2C:E2:BF:76:38:6D:CB:17:13
+```
 
 ## Design notes
 
