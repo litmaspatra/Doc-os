@@ -1,0 +1,32 @@
+name: Publish release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        required: true
+        default: v1.0.1
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create release with the signed APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          echo "99317414a0af58fb6eac6151b73dd81614fed519ef17148a380de45a0872577d  release/docos.apk" | sha256sum -c -
+          cat > notes.md <<'NOTES'
+          Doc-os 1.0.1: lightweight PDF / DOCX / XLSX / PPTX reader and editor for Android 6+.
+
+          Fixes the crash on startup in 1.0.0. If the app ever closes unexpectedly, the next start shows a report you can copy.
+
+          APK SHA-256: `99317414a0af58fb6eac6151b73dd81614fed519ef17148a380de45a0872577d`
+          Signing certificate SHA-256: `C3:EF:50:0C:D0:70:5D:1D:BA:09:00:C2:EB:5B:58:D2:D6:A7:1D:FA:63:D2:44:2C:E2:BF:76:38:6D:CB:17:13`
+
+          Uninstall 1.0.0 first if it is installed. If Play Protect shows an "unknown app" prompt: More details, then Install anyway.
+          NOTES
+          gh release create "$TAG" release/docos.apk --title "Doc-os $TAG" --notes-file notes.md --latest
