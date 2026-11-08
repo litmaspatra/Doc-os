@@ -1,0 +1,40 @@
+name: Build APK
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+      - run: gradle assembleRelease --no-daemon
+      - name: Check size (<1 MB)
+        run: |
+          cp app/build/outputs/apk/release/app-release-unsigned.apk docos-unsigned.apk
+          SIZE=$(stat -c%s docos-unsigned.apk); echo "APK size: $SIZE bytes"
+          [ "$SIZE" -lt 1048576 ]
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docos-unsigned-apk
+          path: docos-unsigned.apk
+      - name: Draft release (unsigned; maintainer signs and publishes)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" docos-unsigned.apk --draft \
+            --title "Doc-os $GITHUB_REF_NAME" --notes "Signed APK attached."
