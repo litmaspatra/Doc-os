@@ -1,0 +1,25 @@
+name: Publish release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag
+        required: true
+        default: v1.0.0
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Attach signed APK and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          echo "97e62717c53853c952588dc84f03c4c9b60212d94adf389037656bc526a81098  release/docos.apk" | sha256sum -c -
+          gh release upload "$TAG" release/docos.apk --clobber
+          gh release edit "$TAG" --draft=false --latest
